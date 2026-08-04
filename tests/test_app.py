@@ -513,18 +513,37 @@ def test_account_page_accessible(client):
     assert b"claude_bot engine" in resp.data
 
 
-def test_account_update_username(client):
+def test_account_update_will_not_change_a_username_or_email(client, flask_app):
+    """Both moved to cgovind.com/accounts, and this route has to say so.
+
+    It used to do them, with no password and no confirmation. A username is now
+    the permanent address of a profile the other three games link to, and an
+    email change is only real once the new address has confirmed it - neither of
+    which can be true if one POST here can still do it. The refusal is what
+    keeps the accounts site's rules from being one page away from bypassable,
+    so it is worth a test of its own, including that nothing was written.
+    """
     create_and_login(client, "update_me")
-    resp = client.post("/account/update", json={"field": "username", "value": "updated_me"})
-    data = json.loads(resp.data)
-    assert data["ok"]
+
+    for field, value in [("username", "updated_me"), ("email", "new@example.com")]:
+        resp = client.post("/account/update", json={"field": field, "value": value})
+        data = json.loads(resp.data)
+        assert not data["ok"], field
+        assert "cgovind.com/accounts" in data["error"]
+
+    with flask_app.app_context():
+        from models import User
+        user = User.query.filter_by(username="update_me").first()
+        assert user is not None                      # still under the old name
+        assert user.email != "new@example.com"
 
 
-def test_account_update_bad_username(client):
-    create_and_login(client, "bad_update")
-    resp = client.post("/account/update", json={"field": "username", "value": "x"})
-    data = json.loads(resp.data)
-    assert not data["ok"]
+def test_account_update_still_takes_a_phone_number(client):
+    """The one identity-ish field that did *not* move: it is TTR's own game
+    alert setting rather than anything the other three games share."""
+    create_and_login(client, "phone_update")
+    resp = client.post("/account/update", json={"field": "phone", "value": "+1 555 123 4567"})
+    assert json.loads(resp.data)["ok"]
 
 
 # ---------------------------------------------------------------------------

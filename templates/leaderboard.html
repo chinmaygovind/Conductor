@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_player.html" as pl with context %}
 {% block title %}Leaderboard — Ticket to Ride{% endblock %}
 
 {% block body %}
@@ -36,7 +37,7 @@
             {% elif loop.index == 3 %}🥉
             {% else %}{{ loop.index }}{% endif %}
           </td>
-          <td class="lb-name">{{ p.username }}</td>
+          <td class="lb-name">{{ pl.player(p) }}</td>
           <td class="lb-tier">{{ p.elo_tier }}</td>
           <td class="lb-elo">{{ p.elo or 1000 }}</td>
           <td class="lb-games">{{ p.games_played or 0 }}</td>

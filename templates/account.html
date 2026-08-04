@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Account — {{ user.username }}{% endblock %}
+{% block title %}Account — {{ user.display }}{% endblock %}
 
 {% block body %}
 <div class="lobbies-bg">
@@ -72,26 +72,32 @@
 
       <div class="account-section-title">PROFILE SETTINGS</div>
 
-      <!-- Username -->
+      <!-- Username and email moved to cgovind.com/accounts.
+           They belong to the shared account rather than to this game: the
+           username is the address of a profile every game links to, and an
+           email change needs the new address to confirm itself before it
+           takes effect. Doing either from here would be a second, weaker
+           way to do the same thing. -->
       <div class="account-field-group">
         <div class="account-field-label">USERNAME</div>
         <div class="account-field-row">
-          <input type="text" class="account-input" id="field-username"
-                 value="{{ user.username }}" maxlength="30" autocomplete="off"/>
-          <button class="account-save-btn" data-field="username">Save</button>
+          <input type="text" class="account-input" value="{{ user.username }}" disabled/>
         </div>
-        <div class="account-field-hint" id="hint-username"></div>
+        <div class="account-field-hint">
+          Your display name, email and password live on your
+          <a href="{{ site_url }}/accounts/settings">cgovind.com account</a> —
+          one set of details for all four games.
+        </div>
       </div>
 
-      <!-- Email -->
       <div class="account-field-group">
         <div class="account-field-label">EMAIL</div>
         <div class="account-field-row">
-          <input type="email" class="account-input" id="field-email"
-                 value="{{ user.email }}" autocomplete="email"/>
-          <button class="account-save-btn" data-field="email">Save</button>
+          <input type="email" class="account-input" value="{{ user.email }}" disabled/>
         </div>
-        <div class="account-field-hint" id="hint-email"></div>
+        <div class="account-field-hint">
+          <a href="{{ site_url }}/accounts/settings">Change it at cgovind.com</a>.
+        </div>
       </div>
 
       <!-- Phone -->

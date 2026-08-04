@@ -78,9 +78,15 @@ if os.environ.get("SESSION_COOKIE_SECURE", "").lower() in ("1", "true", "yes"):
 # Inject asset version into all templates for cache-busting
 _ASSET_VERSION = GIT_VERSION_NAME or 'dev'
 
+# The main site, which is where /accounts and the flag art are served from.
+# Deliberately not `SITE_URL`, which on the box already means this service's own
+# public address.
+MAIN_SITE_URL = os.environ.get("MAIN_SITE_URL", "https://cgovind.com").rstrip("/")
+
+
 @app.context_processor
 def inject_asset_version():
-    return {'asset_version': _ASSET_VERSION}
+    return {'asset_version': _ASSET_VERSION, 'site_url': MAIN_SITE_URL}
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 if DATABASE_URL.startswith("postgres://"):
@@ -175,9 +181,15 @@ def get_current_user():
 
 
 def get_effective_name() -> str:
+    """The name to put on a seat: theirs if they chose one, else their username.
+
+    Everything that writes a player's name into a game reads it from here, so
+    the display name set on cgovind.com/accounts follows somebody into every
+    lobby without any of the game code knowing that is what happened.
+    """
     user = get_current_user()
     if user:
-        return user.username
+        return user.display
     return session.get("guest_name", "Guest")
 
 
@@ -480,23 +492,17 @@ def account_update():
     data = request.json or {}
     field = data.get("field", "")
 
-    if field == "username":
-        new_val = data.get("value", "").strip()
-        if not _valid_username(new_val):
-            return jsonify({"ok": False, "error": "Username must be 2-30 characters, start with a letter, letters/numbers/hyphens/underscores only."}), 400
-        existing = User.query.filter_by(username=new_val).first()
-        if existing and existing.id != user.id:
-            return jsonify({"ok": False, "error": "Username already taken."}), 409
-        user.username = new_val
-
-    elif field == "email":
-        new_val = data.get("value", "").strip().lower()
-        if not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', new_val):
-            return jsonify({"ok": False, "error": "Please enter a valid email address."}), 400
-        existing = User.query.filter_by(email=new_val).first()
-        if existing and existing.id != user.id:
-            return jsonify({"ok": False, "error": "Email already in use."}), 409
-        user.email = new_val
+    if field in ("username", "email"):
+        # Both moved to cgovind.com/accounts, and this refuses rather than
+        # redirects because it is the *route* that has to stop working, not
+        # just the form. A username is the address of a profile the other three
+        # games link to, so it is permanent now; an email change has to be
+        # confirmed by the new address before it takes effect, which cannot be
+        # done in a single POST. Leaving this branch in place would be a way
+        # round both, one page over.
+        return jsonify({"ok": False, "error":
+                        "Your username and email are part of your cgovind.com "
+                        "account now - change them at cgovind.com/accounts."}), 400
 
     elif field == "phone":
         new_val = data.get("value", "").strip() or None

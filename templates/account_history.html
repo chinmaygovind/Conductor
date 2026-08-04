@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Match History — {{ user.username }}{% endblock %}
+{% block title %}Match History — {{ user.display }}{% endblock %}
 
 {% block body %}
 <div class="lobbies-bg">
@@ -8,7 +8,7 @@
   {% include '_nav.html' %}
 
   <div class="lobbies-body">
-    <div class="lobbies-section-title">📋 MATCH HISTORY — {{ user.username }}</div>
+    <div class="lobbies-section-title">📋 MATCH HISTORY — {{ user.display }}</div>
 
     {% if not history %}
     <div class="lobby-empty">

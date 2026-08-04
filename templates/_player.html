@@ -1,0 +1,23 @@
+{# One player's name on a board: their flag, their name, and a way to them.
+
+   The flag art and the profile both live on the main site, so both are
+   absolute (`site_url` comes from the context processor).
+   `UserProfile.flag_path` decides *which* flag - country or US state - so this
+   template never has to know that there is a choice.
+
+   `user.display` rather than `user.username`: the username is the login and
+   the address of a profile, the display name is what a person is called. The
+   link uses the username for exactly that reason - it is the one that does not
+   change. A guest, or a lap whose account is gone, has no profile to point at
+   and gets plain text rather than a dead link. #}
+
+{% macro player(user) -%}
+  {%- if user -%}
+    {%- if user.flag_path %}<img class="flag" src="{{ site_url }}{{ user.flag_path }}"
+      alt="" loading="lazy"/>{% endif -%}
+    <a class="player-link" href="{{ site_url }}/accounts/{{ user.username }}"
+       >{{ user.display }}</a>
+  {%- else -%}
+    ?
+  {%- endif -%}
+{%- endmacro %}

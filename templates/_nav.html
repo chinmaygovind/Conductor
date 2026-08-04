@@ -2,7 +2,7 @@
   <a class="site-nav-logo" href="/lobbies">🚂 TICKET TO RIDE</a>
   <div class="site-nav-right">
     {% if user %}
-      <span class="site-nav-user">Playing as <strong>{{ user.username }}</strong> &nbsp;·&nbsp; Rating: <strong>{{ user.elo or 1000 }}</strong></span>
+      <span class="site-nav-user">Playing as <strong>{{ user.display }}</strong> &nbsp;·&nbsp; Rating: <strong>{{ user.elo or 1000 }}</strong></span>
     {% elif guest_name %}
       <span class="site-nav-user">Playing as <strong>{{ guest_name }}</strong> <span class="guest-badge">GUEST</span></span>
     {% endif %}

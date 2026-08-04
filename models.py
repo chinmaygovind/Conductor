@@ -106,6 +106,69 @@ class User(db.Model):
             return False
         return check_password_hash(self.password_hash, pw)
 
+    @property
+    def display(self):
+        """What to call this person on screen - here, and on every other game.
+
+        The username is the login and the address of their profile, so it never
+        changes; the display name is the one they chose, and it is what a
+        lobby, a table and a leaderboard all show.
+        """
+        p = self.profile
+        return p.display_name if p and p.display_name else self.username
+
+    @property
+    def flag_path(self):
+        return self.profile.flag_path if self.profile else None
+
+
+
+class UserProfile(db.Model):
+    """The shared profile: who this person is across all four games.
+
+    Owned by the accounts pages at cgovind.com/accounts (``accounts/models.py``
+    in the website repo), and mapped here read-only for the two things a game
+    draws: the display name and the flag. Same physical table, same columns,
+    same convention as ``User`` above - ``create_all`` is CREATE TABLE IF NOT
+    EXISTS, so whichever of the five services starts first makes it and the
+    rest find it.
+
+    Every column is optional and the row itself is optional: it appears the
+    first time somebody saves something on their profile, so ``user.profile``
+    is ``None`` for most accounts and both helpers on ``User`` cope with that.
+    """
+    __tablename__ = "user_profiles"
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)
+    display_name = db.Column(db.String(30), nullable=True)
+    display_name_lc = db.Column(db.String(30), unique=True, index=True, nullable=True)
+    avatar = db.Column(db.String(64), nullable=True)
+    country = db.Column(db.String(2), nullable=True)
+    us_state = db.Column(db.String(2), nullable=True)
+    flag_pref = db.Column(db.String(8), default="country")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship("User", backref=db.backref("profile", uselist=False,
+                                                      cascade="all, delete-orphan"))
+
+    @property
+    def flag_path(self):
+        """Site-relative path of the flag this profile flies, or None.
+
+        Just string formatting: the flag art lives on the main site and the
+        list of which codes exist lives with the picker that validates them, so
+        a game does not need either - it renders what was stored. A state flag
+        is only flown by somebody in the US who asked for one, which is checked
+        here as well as there, so a stale ``flag_pref`` left over from a move
+        cannot fly the wrong flag.
+        """
+        if self.country == "us" and self.flag_pref == "state" and self.us_state:
+            return "/assets/flags/us/%s.png" % self.us_state.lower()
+        if self.country:
+            return "/assets/flags/country/%s.svg" % self.country.lower()
+        return None
+
 
 class TtrStats(db.Model):
     """Ticket to Ride stats, one row per user. Split out of `users` so the
