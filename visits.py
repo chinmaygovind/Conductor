@@ -87,7 +87,7 @@ BOT_RE = re.compile(
 # than evicted cleverly.
 _SESSIONS = {}
 _SESSIONS_MAX = 4000
-# user_id -> when this process last wrote a presence row for them.
+# user_id -> (when this process last wrote a presence row, what it said).
 _PRESENCE_AT = {}
 
 TS_FMT = "%Y-%m-%d %H:%M:%S.%f"
@@ -358,9 +358,14 @@ def _write(db, user_id, service, detail, keep_detail, at=None):
         return
     at = at or now()
     last = _PRESENCE_AT.get(user_id)
-    # The throttle is skipped when there is something new to say, so pressing
-    # Start on a track shows up immediately rather than up to 20 seconds later.
-    if keep_detail and last and (at - last).total_seconds() < PRESENCE_EVERY:
+    # Throttled only while there is nothing new to say. **Moving between games
+    # is something new**, and an earlier version checked the clock alone: open
+    # King of Tokyo ten seconds after a lap and the write was skipped, so the
+    # profile went on claiming you were driving until some later request
+    # happened to get through. A heartbeat is never throttled at all - it is
+    # once a minute and it is the thing that carries the detail.
+    if (keep_detail and last and last[1] == service
+            and (at - last[0]).total_seconds() < PRESENCE_EVERY):
         return
     try:
         db.session.execute(text(
@@ -375,7 +380,7 @@ def _write(db, user_id, service, detail, keep_detail, at=None):
         ), {"u": user_id, "s": service, "d": detail, "t": stamp(at),
             "keep": 1 if keep_detail else 0})
         db.session.commit()
-        _PRESENCE_AT[user_id] = at
+        _PRESENCE_AT[user_id] = (at, service)
     except Exception:                                    # noqa: BLE001
         try:
             db.session.rollback()
