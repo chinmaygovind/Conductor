@@ -28,6 +28,25 @@
 
     <div id="join-error" class="error-msg hidden" style="margin-bottom:1rem;"></div>
 
+    <!-- Who is around, across all four games rather than just this one. The
+         question a lobby actually raises is "is there anybody to play", and
+         somebody in the middle of a race is somebody you can ask - so the row
+         says what they are doing rather than pretending they are waiting here.
+         Absent entirely when nobody is on: an empty list headed "Online now"
+         is a worse answer than no list. -->
+    {% if online %}
+    <div class="lobbies-section-title">ONLINE NOW</div>
+    <div class="online-now">
+      {% for p in online %}
+      <a class="online-row" href="{{ site_url }}/accounts/{{ p.username }}">
+        <span class="dot"></span>
+        <strong>{{ p.username }}</strong>
+        <span class="online-what">{{ p.label }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
     <!-- Public games -->
     <div class="lobbies-section-title">AVAILABLE GAMES</div>
     <div class="lobby-list" id="lobby-list">

@@ -22,6 +22,31 @@
   {% block body %}{% endblock %}
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   {% block scripts %}{% endblock %}
+  <!-- The heartbeat behind the green dot on cgovind.com/accounts. Inline
+       rather than a file of its own: it is a dozen lines, and a new file would
+       have to join `sw.js`'s precache list to work offline, which is a lot of
+       machinery for a ping. -->
+  <script>
+    (function () {
+      var where = {{ (presence_where or 'home')|tojson }};
+      function ping() {
+        // A hidden tab is not somebody playing. Skipping it is most of what
+        // makes the dot honest about a browser left open for three days.
+        if (document.hidden || !{{ 'true' if presence_on else 'false' }}) return;
+        try {
+          fetch('/api/presence', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ where: where }), keepalive: true,
+          }).catch(function () {});
+        } catch (e) {}
+      }
+      ping();
+      setInterval(ping, 60000);
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) ping();
+      });
+    })();
+  </script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {});

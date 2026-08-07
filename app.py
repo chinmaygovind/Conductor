@@ -49,6 +49,7 @@ from flask import (Flask, render_template, request, jsonify,
 from flask_socketio import SocketIO, join_room, leave_room, emit
 
 from models import db, Game, Player, User, GameResult, Friendship, TtrStats
+import visits
 from game_data_na import ROUTES, CITIES, DESTINATION_TICKETS, PLAYER_COLORS, CARD_COLOR_HEX, BOARD_WIDTH, BOARD_HEIGHT
 from game_data_europe import (
     EUROPE_ROUTES, EUROPE_CITIES, EUROPE_DESTINATION_TICKETS,
@@ -86,7 +87,26 @@ MAIN_SITE_URL = os.environ.get("MAIN_SITE_URL", "https://cgovind.com").rstrip("/
 
 @app.context_processor
 def inject_asset_version():
-    return {'asset_version': _ASSET_VERSION, 'site_url': MAIN_SITE_URL}
+    # `presence_where` is what the heartbeat in base.html says about this
+    # page. Derived from the endpoint rather than passed by each route, so a
+    # new page gets a sensible answer without anybody remembering to add one.
+    # `presence_on` is read off the session rather than by loading the user:
+    # the heartbeat only needs to know whether this browser has an account,
+    # and this runs on every render of every page. Not every route passes
+    # `user` into its template, so relying on that would have quietly
+    # switched the heartbeat off on the pages that do not.
+    return {'asset_version': _ASSET_VERSION, 'site_url': MAIN_SITE_URL,
+            'presence_on': bool(session.get('user_id')),
+            'presence_where': PRESENCE_BY_ENDPOINT.get(request.endpoint or '', 'home')}
+
+
+PRESENCE_BY_ENDPOINT = {
+    'lobbies': 'lobby',
+    'lobby': 'lobby',
+    'game_page': 'game',
+    'replay_page': 'replay',
+    'leaderboard': 'board',
+}
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 if DATABASE_URL.startswith("postgres://"):
@@ -161,6 +181,14 @@ with app.app_context():
                 _conn.commit()
             except Exception:
                 _conn.rollback()
+
+
+# Every request logged, and this service's players marked as here.
+# `visits.py` is one file copied into all five services and is byte-identical
+# in each - the same convention `models.py` follows. The website repo's
+# `tests/test_no_drift.py` is what stops the copies drifting, and it can only
+# check this one on a machine with the submodule checked out.
+visits.init_app(app, db, "ttr")
 
 
 # ---------------------------------------------------------------------------
@@ -945,7 +973,56 @@ def lobbies():
     notify = user.notify_new_game if user else False
     return render_template("lobbies.html", user=user, guest_name=guest_name,
                            games=public_games, ongoing_games=ongoing_games,
-                           notify_new_game=notify)
+                           notify_new_game=notify, online=_online_now())
+
+
+# What each `where` a page can send is called on a profile. **This table is the
+# whole security model of the status line**: the browser sends a key, and a key
+# that is not in here means no detail at all rather than something to display.
+# A profile page on cgovind.com is public, so anything that let a player put
+# their own words on it would be a billboard with a text box attached.
+PRESENCE_WHERE = {
+    "lobby": "In Lobby",
+    "game": "In Game",
+    "replay": "Watching a replay",
+    "board": "Reading the leaderboard",
+}
+
+
+@app.route("/api/presence", methods=["POST"])
+def api_presence():
+    """The heartbeat behind the green dot on cgovind.com/accounts.
+
+    Sent on load and then once a minute while the tab is visible. Guests get a
+    200 and no row: presence hangs off an account, and there is nowhere to hang
+    a guest's.
+    """
+    user = get_current_user()
+    if not user:
+        return jsonify({"ok": True})
+    where = str((request.json or {}).get("where", ""))[:20]
+    visits.seen(db, user.id, "ttr", PRESENCE_WHERE.get(where))
+    return jsonify({"ok": True})
+
+
+def _online_now():
+    """Who is about, anywhere on cgovind.com, for the lobbies page.
+
+    Across all four games and not just this one, which is the point: the
+    question a lobby raises is "is there anybody around to play", and somebody
+    currently driving is somebody you can ask.
+    """
+    rows = visits.online_now(db.session.connection(), limit=12)
+    for r in rows:
+        r["label"] = PRESENCE_LABEL.get(r["service"], "Online")
+    return rows
+
+
+# The four games as a profile would name them, for the one-line "who is on"
+# list. Deliberately short: this is a sidebar, not a profile.
+PRESENCE_LABEL = {"drive": "Drive", "ttr": "Ticket to Ride",
+                  "ers": "Egyptian Rat Screw", "kot": "King of Tokyo",
+                  "site": "On the site"}
 
 
 @app.route("/create", methods=["POST"])

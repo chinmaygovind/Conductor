@@ -2557,3 +2557,21 @@ body.spectating #draw-blind-btn { display: none; }
    as navigation rather than as standings. */
 .player-link { color: inherit; text-decoration: none; }
 .player-link:hover { text-decoration: underline; }
+
+/* --- who is on, on the lobbies page ---------------------------------------
+   The same green dot cgovind.com/accounts uses, because it means the same
+   thing in both places and a second visual language for "here" would be one
+   too many. No red half: this list is only ever people who are on, and the
+   offline story - and how long ago - belongs on a profile. */
+.online-now { margin-bottom: 1.5rem; }
+.online-row {
+  display: flex; align-items: center; gap: 0.55rem;
+  padding: 0.5rem 0.75rem; border-radius: 8px;
+  color: inherit; text-decoration: none;
+}
+.online-row:hover { background: rgba(255, 255, 255, 0.07); }
+.online-row .dot {
+  width: 0.6rem; height: 0.6rem; border-radius: 50%; flex: none;
+  background: #38c172; box-shadow: 0 0 0 3px rgba(56, 193, 114, 0.22);
+}
+.online-what { margin-left: auto; opacity: 0.7; font-size: 0.9rem; }
