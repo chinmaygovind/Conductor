@@ -66,10 +66,14 @@ COOKIE_MAX_AGE = 60 * 60 * 24 * 730          # two years
 
 # What is furniture rather than a visit. Everything under /static, the
 # websocket transport, the heartbeat itself (it would double the table and say
-# nothing the presence row does not), and anything that is plainly an asset.
+# nothing the presence row does not), the latency probe behind Drive's ping
+# readout (polled every couple of seconds by any tab showing it, and it exists
+# precisely because it does nothing - logging it would be several hundred rows
+# per session saying a browser was still connected), and anything that is
+# plainly an asset.
 # **PDFs are deliberately not in this list**: the resume is the one file on the
 # site whose downloads are worth counting.
-SKIP_PREFIXES = ("/static/", "/socket.io/", "/api/presence")
+SKIP_PREFIXES = ("/static/", "/socket.io/", "/api/presence", "/api/ping")
 ASSET_RE = re.compile(
     r"\.(css|js|mjs|map|json|png|jpe?g|gif|svg|webp|avif|ico|bmp"
     r"|woff2?|ttf|otf|eot|mp3|wav|ogg|m4a|mp4|webm|wasm)$", re.I)
@@ -77,10 +81,54 @@ ASSET_RE = re.compile(
 # Enough to tell a crawler from a person. Deliberately not exhaustive - the
 # flag is a convenience for querying, and nothing is dropped because of it, so
 # a bot this misses is a bot with `is_bot = 0` and not a missing row.
+#
+# The last three lines are the internet's scanners, and they were added by
+# reading this table back after the r/WebGames post on 2026-08-14 rather than
+# by imagining what might turn up. `Python-urllib`, `l9scan`, `research-scan`,
+# `CensysInspect`, `zgrab`, `Go-http-client`, Netcraft and Palo Alto's Xpanse
+# were between them about 600 of that month's "visitors", every one of them a
+# single request to `/` or `/.env`. `python-` rather than `python-requests`
+# because urllib, urllib3 and requests all wear it and no browser wears any of
+# it.
 BOT_RE = re.compile(
-    r"bot|crawl|spider|slurp|scrape|curl|wget|python-requests|httpx|okhttp"
+    r"bot|crawl|spider|slurp|scrape|curl|wget|python-|httpx|okhttp"
     r"|headless|phantom|monitor|uptime|pingdom|facebookexternalhit|preview"
-    r"|lighthouse|screaming|semrush|ahrefs|bingpreview|feedfetcher", re.I)
+    r"|lighthouse|screaming|semrush|ahrefs|bingpreview|feedfetcher"
+    r"|scan|zgrab|nuclei|nmap|censys|leakix|netcraft|shodan|expanse"
+    r"|paloaltonetworks|research|go-http-client|java/|axios|node-fetch"
+    r"|aiohttp|libwww", re.I)
+
+
+def is_crawler(agent):
+    """Whether a ``User-Agent`` belongs to a machine. Three shapes, one regex.
+
+    **No User-Agent at all is never a browser.** Every engine sends one, so an
+    empty header is a script that did not bother; 150 arrived in the thirty
+    days around Drive's launch, one request each. **A bare ``Mozilla/5.0`` is
+    not one either**: that token is a fossil which every real browser follows
+    with a platform, an engine and a version, so alone it is a scanner wearing
+    the shortest string it thinks will pass.
+
+    What this deliberately cannot catch is a scanner wearing a *complete and
+    plausible* browser string. The commonest single "visitor" on this site is
+    an eight-year-old iPhone Safari UA arriving from a different address every
+    time, one request, no assets, no second page - 370 of them in that same
+    month, more than every signature above put together. Nothing readable from
+    one request's headers separates that from a person, which is the whole
+    reason `/admin` grew a tile counting people who *drove a lap*: behaviour is
+    the only honest denominator, and the visitor count is not one.
+
+    Still a flag and never a filter, per rule 3 at the top of this file: these
+    rows are written like any other, and every figure in the console prints the
+    crawler count beside it.
+    """
+    agent = (agent or "").strip()
+    if not agent:
+        return True
+    if agent.lower().rstrip(" /") in ("mozilla", "mozilla/5.0", "mozilla/4.0"):
+        return True
+    return bool(BOT_RE.search(agent))
+
 
 # visitor_id -> (session_id, last_seen). Bounded, because it is a cache and not
 # a record: losing it costs one SELECT, so it is thrown away wholesale rather
@@ -240,7 +288,7 @@ def _record(db, service, response):
         return
 
     agent = request.headers.get("User-Agent", "") or ""
-    is_bot = 1 if BOT_RE.search(agent) else 0
+    is_bot = 1 if is_crawler(agent) else 0
     row = {
         "ts": stamp(at),
         "service": service,
