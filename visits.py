@@ -269,11 +269,32 @@ def _record(db, service, response):
     # first thing a visitor loads (usually a page, sometimes an asset) would
     # hand out a second id on the very next request.
     if getattr(g, "visitor_is_new", False):
+        # `SameSite=None; Partitioned` wherever the cookie is already Secure,
+        # and `Lax` where it is not.
+        #
+        # **Drive is framed on other people's pages now** (a game portal embeds
+        # it rather than hosting it), and a `Lax` cookie is not sent at all when
+        # the top-level site is somebody else's - so every request from a framed
+        # player arrived with no visitor id, was handed a fresh one, and counted
+        # as a brand new person. Not a small error: it is one new "visitor" per
+        # page view, which is the shape of a traffic spike, and there is no way
+        # to tell afterwards which numbers it touched.
+        #
+        # Two things make this safe for the four services that are *not* framed.
+        # `None` needs `Secure`, so it hangs off the same env flag the secure
+        # cookie already did and a plain-http dev box keeps the cookie it always
+        # had. And the CHIPS partition key is the top-level *site* - the
+        # registrable domain - so `cgovind.com` and `drive.cgovind.com` share one
+        # partition and the cross-subdomain visitor id survives exactly as
+        # before. A portal gets a partition of its own, which is the point: the
+        # id is stable inside that portal and cannot be joined to this one.
+        secure = bool(os.environ.get("SESSION_COOKIE_SECURE", "").lower()
+                      in ("1", "true", "yes"))
         response.set_cookie(
             COOKIE, visitor, max_age=COOKIE_MAX_AGE, httponly=True,
-            samesite="Lax",
-            secure=bool(os.environ.get("SESSION_COOKIE_SECURE", "").lower()
-                        in ("1", "true", "yes")),
+            samesite="None" if secure else "Lax",
+            partitioned=secure,
+            secure=secure,
             domain=os.environ.get("SESSION_COOKIE_DOMAIN") or None)
         g.visitor_is_new = False
 
