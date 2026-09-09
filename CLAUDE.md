@@ -103,6 +103,12 @@ The client merges `game_state_update` carefully so it never clobbers private han
 - `Player` — one row per seat, linked to a `User` when logged in; `session_key` ties a browser
   session (or `bot_*`) to a seat.
 - `Friendship`, `GameResult` — social graph and per-user finished-game history (ELO before/after).
+- **A guest is not signed in, and `/login` must stay reachable for one.**
+  `login_page` used to redirect anybody with a `guest_name` to the lobbies, so
+  the nav's CREATE ACCOUNT was the one link that did nothing - a guest who
+  decided to make a real account was sent back where they started. Only
+  `get_current_user()` is redirected now; `?register=1` (which the nav already
+  carried) still opens the register tab.
 - **Auth routes:** `/login`, `/register`, `/guest`, `/auth/google[/callback]`. Email (SMTP) and
   SMS (Twilio) notifications are optional, configured via env; absent creds just disable them.
 - **Other surfaces:** `/leaderboard`, `/account`, `/account/history`, `/replay/<code>`, and an

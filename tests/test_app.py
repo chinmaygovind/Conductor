@@ -114,6 +114,32 @@ def test_guest_login_ok(client):
     assert data["ok"]
 
 
+def test_a_guest_can_still_reach_the_login_page(client):
+    """The nav's CREATE ACCOUNT used to be the one link that did nothing.
+
+    `login_page` counted a guest name as "already signed in" and redirected to
+    the lobbies, so a guest who decided to make a real account was sent back to
+    where they started. Only an account is sent away now.
+    """
+    assert json.loads(client.post("/guest", json={"name": "Guestina"}).data)["ok"]
+    resp = client.get("/login")
+    assert resp.status_code == 200
+    assert "CREATE ACCOUNT" in resp.get_data(as_text=True)
+
+
+def test_the_nav_points_a_guest_at_the_register_tab(client):
+    assert json.loads(client.post("/guest", json={"name": "Guestina"}).data)["ok"]
+    html = client.get("/lobbies").get_data(as_text=True)
+    assert 'href="/login?register=1"' in html
+
+
+def test_an_account_is_still_sent_to_the_lobbies(client):
+    create_and_login(client, "stillredirected")
+    resp = client.get("/login")
+    assert resp.status_code == 302
+    assert "/lobbies" in resp.headers["Location"]
+
+
 def test_guest_login_bad_name(client):
     resp = client.post("/guest", json={"name": "x"})
     data = json.loads(resp.data)

@@ -363,7 +363,11 @@ def index():
 
 @app.route("/login", methods=["GET"])
 def login_page():
-    if get_current_user() or session.get("guest_name"):
+    # Only an *account* is sent away. A guest clicking CREATE ACCOUNT in the
+    # nav is somebody who has decided to make a real one, and this is the page
+    # that makes it - redirecting them to the lobbies made that link do
+    # nothing. `?register=1` still opens the register tab.
+    if get_current_user():
         return redirect(url_for("lobbies"))
     google_setup = bool(request.args.get("google_setup"))
     return render_template("login.html", google_enabled=GOOGLE_ENABLED,
