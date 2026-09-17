@@ -287,7 +287,7 @@ def _send_email(to_email: str, subject: str, body: str):
 
 def _send_game_notifications(game_code: str, host_name: str, site_url: str):
     join_url = f"{site_url}/lobby/{game_code}"
-    message = f"{host_name} just created a Ticket to Ride game! Join here: {join_url}"
+    message = f"{host_name} just created a Conductor game! Join here: {join_url}"
     with app.app_context():
         # Find the host's user_id from the game
         game = Game.query.filter_by(code=game_code).first()
@@ -321,7 +321,7 @@ def _send_game_notifications(game_code: str, host_name: str, site_url: str):
             if user.phone:
                 _send_sms(user.phone, message)
             elif user.email:
-                _send_email(user.email, "New Ticket to Ride Game!", message)
+                _send_email(user.email, "New Conductor Game!", message)
 
 
 # ---------------------------------------------------------------------------
@@ -1024,7 +1024,7 @@ def _online_now():
 
 # The four games as a profile would name them, for the one-line "who is on"
 # list. Deliberately short: this is a sidebar, not a profile.
-PRESENCE_LABEL = {"drive": "Drive", "ttr": "Ticket to Ride",
+PRESENCE_LABEL = {"drive": "Drive", "ttr": "Conductor",
                   "ers": "Egyptian Rat Screw", "kot": "King of Tokyo",
                   "site": "On the site"}
 

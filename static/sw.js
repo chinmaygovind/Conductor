@@ -1,8 +1,8 @@
-// Ticket to Ride — Service Worker
+// Conductor — Service Worker
 // Enables PWA "Add to Home Screen". Uses network-first for all content so
 // Flask's ?v= cache-busting keeps working normally; cache is fallback only.
 
-const CACHE = 'ttr-v1';
+const CACHE = 'conductor-v1';
 
 self.addEventListener('install', e => {
   // Pre-cache the icon so it loads on the home screen even without network

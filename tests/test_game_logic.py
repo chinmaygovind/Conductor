@@ -516,7 +516,7 @@ def test_claim_not_in_initial_phase(two_player_specs):
 
 
 # ---------------------------------------------------------------------------
-# Destination tickets mid-game
+# Destinations mid-game
 # ---------------------------------------------------------------------------
 
 def test_draw_destination_tickets(two_player_specs):

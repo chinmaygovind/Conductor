@@ -1,5 +1,5 @@
 """
-Multi-personality Ticket to Ride bots.
+Multi-personality Conductor bots.
 
 Personalities:
   fish-bot   — The Patient (fishy/kmit70): chains 15-pt routes, huge blind-draw bursts
@@ -358,7 +358,7 @@ def _rocket_turn(state, pid, route_by_id, ticket_by_id, hand, trains, draw_step,
 
 # ---------------------------------------------------------------------------
 # ticket-bot: The Completionist
-# Draws destination tickets aggressively, optimizes for completing every ticket
+# Draws destinations aggressively, optimizes for completing every ticket
 # ---------------------------------------------------------------------------
 
 def _ticket_turn(state, pid, route_by_id, ticket_by_id, hand, trains, draw_step, face_up, claimed):
@@ -606,7 +606,7 @@ def _claude_turn(state, pid, route_by_id, ticket_by_id, hand, trains, draw_step,
 
 # ---------------------------------------------------------------------------
 # greedy-bot: Ticket Grabber
-# Draws destination tickets aggressively and claims the best ticket-synergy
+# Draws destinations aggressively and claims the best ticket-synergy
 # route every turn regardless of length.  CLAIM_THRESHOLD = 0 (claim anything
 # with positive score).  Provides a distinct style vs fish_bot for training.
 # ---------------------------------------------------------------------------

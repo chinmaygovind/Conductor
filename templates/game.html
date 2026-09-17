@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Ticket to Ride: Game{% endblock %}
+{% block title %}Conductor: Game{% endblock %}
 
 {% block head %}
 <style>
@@ -43,7 +43,7 @@
     <div class="board-container" id="board-container">
       <img id="board-img"
            src="{{ url_for('static', filename='images/europe_board.svg') if map_variant == 'europe' else url_for('static', filename='images/board.svg') }}"
-           alt="Ticket to Ride Board" draggable="false"/>
+           alt="Conductor Board" draggable="false"/>
       <svg id="board-svg" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
     <div id="status-bar" class="status-bar"></div>
@@ -52,10 +52,10 @@
   <!-- ===== RIGHT SIDEBAR ===== -->
   <aside class="sidebar right-sidebar">
     <div class="sidebar-section" id="tickets-section">
-      <div class="sidebar-label">YOUR TICKETS</div>
+      <div class="sidebar-label">YOUR DESTINATIONS</div>
       <div id="tickets-panel" class="tickets-area"></div>
       <button class="action-btn tickets-draw-btn" id="draw-tickets-btn">
-        🎫 Draw Destination Tickets
+        🎫 Draw Destinations
         <span id="dest-count" class="deck-count">30</span>
       </button>
     </div>
@@ -90,7 +90,7 @@
   </button>
   <button class="mobile-tab" data-panel="right">
     <span class="mobile-tab-icon">🎫</span>
-    <span>Tickets</span>
+    <span>Destinations</span>
   </button>
   <button class="mobile-tab" data-panel="actions">
     <span class="mobile-tab-icon">📋</span>
@@ -159,7 +159,7 @@
 <div id="ticket-modal" class="modal hidden">
   <div class="modal-backdrop"></div>
   <div class="modal-box">
-    <h2 id="ticket-modal-title">Choose Destination Tickets</h2>
+    <h2 id="ticket-modal-title">Choose Destinations</h2>
     <p id="ticket-modal-desc" class="modal-desc"></p>
     <div id="ticket-choices" class="ticket-choices"></div>
     <div class="modal-footer">
@@ -232,7 +232,7 @@
     <div class="rules-list">
       <div class="rules-row">Draw 2 cards <span class="rules-note">face-up or blind; locomotives are wild</span></div>
       <div class="rules-row">Claim a route <span class="rules-note">play matching cards equal to route length</span></div>
-      <div class="rules-row">Draw 3 tickets <span class="rules-note">keep ≥2, return the rest</span></div>
+      <div class="rules-row">Draw 3 destinations <span class="rules-note">keep ≥2, return the rest</span></div>
     </div>
     {% if map_variant == 'europe' %}
     <div class="sidebar-label" style="margin:0.9rem 0 0.5rem;">SPECIAL RULES</div>
@@ -247,10 +247,10 @@
       </div>
       <div class="rules-special-row">
         <div class="rules-special-label">Stations</div>
-        <div class="rules-special-desc">Place on a city to borrow one opponent route there for tickets. Costs 1/2/3 trains. Unused stations score +4 pts each.</div>
+        <div class="rules-special-desc">Place on a city to borrow one opponent route there for destinations. Costs 1/2/3 trains. Unused stations score +4 pts each.</div>
       </div>
       <div class="rules-special-row">
-        <div class="rules-special-label">Starting tickets</div>
+        <div class="rules-special-label">Starting destinations</div>
         <div class="rules-special-desc">Choose ≥2 from 1 long route + 3 short routes dealt at the start.</div>
       </div>
     </div>
@@ -270,8 +270,8 @@
       {% endif %}
     </div>
     <div class="scoring-bonuses" style="margin-top:0.5rem;">
-      <div class="scoring-bonus-row"><span class="sc-label">Ticket complete</span><span class="sc-pts sc-pos">+ pts</span></div>
-      <div class="scoring-bonus-row"><span class="sc-label">Ticket incomplete</span><span class="sc-pts sc-neg">− pts</span></div>
+      <div class="scoring-bonus-row"><span class="sc-label">Destination complete</span><span class="sc-pts sc-pos">+ pts</span></div>
+      <div class="scoring-bonus-row"><span class="sc-label">Destination incomplete</span><span class="sc-pts sc-neg">− pts</span></div>
       <div class="scoring-bonus-row"><span class="sc-label">Longest path</span><span class="sc-pts sc-pos">+10 pts</span></div>
       {% if map_variant == 'europe' %}
       <div class="scoring-bonus-row"><span class="sc-label">Unused station</span><span class="sc-pts sc-pos">+4 pts</span></div>

@@ -1,6 +1,6 @@
 ﻿#!/usr/bin/env python3
 """
-Generate a beautiful SVG map of North America for Ticket to Ride.
+Generate a beautiful SVG map of North America for Conductor.
 Uses simplified coastline paths for US, Canada, and Mexico.
 """
 

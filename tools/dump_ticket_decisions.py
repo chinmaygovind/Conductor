@@ -1,4 +1,4 @@
-"""Flatten ticket-selection decisions out of a Ticket to Ride SQLite DB.
+"""Flatten ticket-selection decisions out of a Conductor SQLite DB.
 
 Each finished/active game's state_json carries a `ticket_decisions` list (see
 app._log_ticket_decision): every ticket OFFER with what was kept/rejected and the

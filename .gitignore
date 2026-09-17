@@ -24,3 +24,9 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# Retail board scans and publisher rulebooks - removed Sep 2026 after a
+# trademark notice. Never commit these back; see CLAUDE.md "Board art".
+assets/
+static/images/board.png
+static/images/europe_board.png

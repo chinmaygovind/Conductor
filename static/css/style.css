@@ -27,7 +27,7 @@ html, body {
   min-height: 100vh;
   background:
     radial-gradient(ellipse at 50% 0%, rgba(200,168,75,0.15) 0%, transparent 70%),
-    url('/static/images/board.png') center/cover no-repeat;
+    url('/static/images/board.svg') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,7 +36,7 @@ html, body {
 
 .landing-overlay {
   position: absolute; inset: 0;
-  background: rgba(10,8,5,0.82);
+  background: rgba(10,8,5,0.72);
 }
 
 .landing-content {
@@ -63,17 +63,12 @@ html, body {
 }
 .logo-title {
   font-family: 'Cinzel', serif;
-  font-size: clamp(3rem, 10vw, 5.5rem);
+  font-size: clamp(2.4rem, 13vw, 5rem);
   font-weight: 900;
-  line-height: 0.95;
+  line-height: 1.05;
   color: var(--gold-light);
   text-shadow: 0 0 40px rgba(200,168,75,0.4), 3px 3px 0 rgba(0,0,0,0.5);
-  letter-spacing: -0.02em;
-}
-.logo-to {
-  font-style: italic;
-  font-size: 0.7em;
-  color: var(--gold);
+  letter-spacing: 0.02em;
 }
 .logo-stars { color: var(--gold); font-size: 1.2rem; letter-spacing: 0.8em; margin-top: 0.5rem; }
 
@@ -1330,7 +1325,7 @@ body.spectating #draw-blind-btn { display: none; }
   min-height: 100vh;
   background:
     radial-gradient(ellipse at 50% 0%, rgba(200,168,75,0.15) 0%, transparent 70%),
-    url('/static/images/board.png') center/cover no-repeat;
+    url('/static/images/board.svg') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1339,7 +1334,7 @@ body.spectating #draw-blind-btn { display: none; }
 }
 .login-overlay {
   position: absolute; inset: 0;
-  background: rgba(10,8,5,0.85);
+  background: rgba(10,8,5,0.75);
 }
 .login-content {
   position: relative;

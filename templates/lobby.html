@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Ticket to Ride: Waiting to Start…{% endblock %}
+{% block title %}Conductor: Waiting to Start…{% endblock %}
 
 {% block body %}
 <div class="lobby-bg">
@@ -84,9 +84,9 @@
       <div class="lobby-panel lobby-rules">
         <div class="section-title">HOW TO PLAY</div>
         <ul class="rules-list">
-          <li>On your turn: <strong>draw 2 train cards</strong>, <strong>claim a route</strong>, or <strong>draw destination tickets</strong>.</li>
+          <li>On your turn: <strong>draw 2 train cards</strong>, <strong>claim a route</strong>, or <strong>draw destinations</strong>.</li>
           <li>Claim routes by playing matching colored cards equal to route length. Locomotives are wild.</li>
-          <li>Complete destination tickets for bonus points; incomplete ones cost points.</li>
+          <li>Complete destinations for bonus points; incomplete ones cost points.</li>
           <li>Game ends when a player has ≤2 trains left. <strong>10 pts</strong> for the Longest Continuous Path.</li>
           {% if game.map_variant == 'europe' %}
           <li><strong>Tunnels:</strong> draw 3 extra cards — pay matching cards revealed or abort.</li>
@@ -270,7 +270,7 @@ if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
   shareBtn.style.display = '';
   shareBtn.addEventListener('click', () => {
     const url = window.location.origin + '/lobby/' + GAME_CODE;
-    navigator.share({ title: 'Join my Ticket to Ride game!', url }).catch(() => {});
+    navigator.share({ title: 'Join my Conductor game!', url }).catch(() => {});
   });
 }
 </script>

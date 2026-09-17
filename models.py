@@ -171,7 +171,7 @@ class UserProfile(db.Model):
 
 
 class TtrStats(db.Model):
-    """Ticket to Ride stats, one row per user. Split out of `users` so the
+    """Conductor stats, one row per user. Split out of `users` so the
     account (users) can be shared with the Egyptian Rat Screw app while each
     game keeps its own stats."""
     __tablename__ = "ttr_stats"

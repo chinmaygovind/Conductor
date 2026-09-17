@@ -1,7 +1,7 @@
 {
-  "name": "Ticket to Ride",
-  "short_name": "TTR",
-  "description": "Online multiplayer Ticket to Ride board game",
+  "name": "Conductor",
+  "short_name": "Conductor",
+  "description": "Online multiplayer Conductor board game",
   "start_url": "/",
   "display": "standalone",
   "orientation": "landscape",

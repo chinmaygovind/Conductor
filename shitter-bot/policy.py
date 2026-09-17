@@ -1,5 +1,5 @@
 """
-shitter-bot — the sophisticated Ticket to Ride brain.
+shitter-bot — the sophisticated Conductor brain.
 
 A self-contained, instant (no tree search) policy that plays the way a strong
 human does. Public entry: shitter_policy(state, pid) -> (action, params).
@@ -56,7 +56,7 @@ _PTS = ROUTE_SCORING          # length -> route points {1:1,2:2,3:4,4:7,5:10,6:1
 # a wasteful detour.
 _HOP_PENALTY = 0.8
 
-# Drawing EXTRA destination tickets mid-game — ENABLED but DISCIPLINED.
+# Drawing EXTRA destinations mid-game — ENABLED but DISCIPLINED.
 # History: a naive "draw when network is big" fallback backfired hard (you MUST
 # keep >=1 of the 3, and a fresh cross-map ticket is usually unfinishable dead
 # weight): real prod games g178 (-54 pts, scored 21) and g179 (-23, scored 62).
@@ -566,7 +566,7 @@ def shitter_policy(state, pid):
 # shittér-bot (shitter_bot_2) — the rival
 # ---------------------------------------------------------------------------
 # Plays EXACTLY like shitter-bot, but quietly sabotages one target (by default
-# "fishy"). It cheats: it reads the target's PRIVATE hand + destination tickets to
+# "fishy"). It cheats: it reads the target's PRIVATE hand + destinations to
 # know precisely which routes he still needs and which colours he's hunting. The
 # camouflage rule is strict — it only ever acts on that knowledge when the move
 # also looks like ordinary strong play, so nothing it does stands out:

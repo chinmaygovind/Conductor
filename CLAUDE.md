@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Full multiplayer online **Ticket to Ride** with two maps (North America + Europe).
+Full multiplayer online **Conductor** with two maps (North America + Europe).
 Flask + Flask-SocketIO backend, vanilla JS + hand-traced SVG frontend, SQLite/PostgreSQL.
 Includes accounts, Google OAuth, ELO ranking, friends, leaderboard, game replays, and an
 admin DB browser — not just the game itself.
@@ -120,6 +120,29 @@ board image (viewBox `0 0 1024 683`), handles socket events, modals, and UI. Rou
 explicit `(cx, cy, angle)` segment data from `route_segments*.py` (passed as `BOARD_DATA`), falling
 back to linear interpolation. Templates in `templates/` inject per-game globals (`GAME_CODE`,
 `MY_PLAYER_ID`, `MY_COLOR`, `BOARD_DATA`). No frontend build/test tooling.
+
+### Board art, and what was deleted (Sep 2026)
+The board the game draws on is **`static/images/board.svg` / `europe_board.svg`, which are our own
+tracings** - our coastline paths, our palette - generated once by the Tkinter tools in
+`scripts/board/`. They are the only board art the app serves, and they are what the login and
+landing backgrounds use too.
+
+**The retail board scans and the publisher's rulebook PDFs are gone and must not come back.**
+`assets/` (both rulebook PDFs, `usa_board.png`, `europe_board.png`, a scraped BGG page) and
+`static/images/board.png` / `europe_board.png` were removed after a trademark notice from Rapid7
+acting for Asmodee (AWS case 178949924200884-1). The PNGs were only ever *tracing references*, plus
+the login/landing background - nothing computed from them at runtime.
+
+The consequence is that **every tool in `scripts/board/` is now un-runnable**: `trace_coastline.py`,
+`calibrate_board.py`, `calibrate_cities.py`, `detect_board.py`, `draw_templates.py`, `pick_colors.py`,
+`fix_cities.py`, `trace_europe.py` and `scripts/europe_debug.html` all open a scan that no longer
+exists. They are kept because they are the record of how the SVGs were made and what the JSON traces
+in that directory mean, not because they can be re-run. **The tracing is finished; the SVGs are the
+source of truth.** If a board ever needs re-tracing, trace something we are allowed to hold.
+
+These files are in `.gitignore` now so a stray local copy cannot be committed back by accident.
+**They are still in git history** - the repo was not rewritten - so a history purge is the open
+follow-up if Asmodee ever asks for one.
 
 ### Config & secrets
 Env is loaded from `.env` (gitignored). Keys: `SECRET_KEY`, `PORT`, `SITE_URL`, `DATABASE_URL`

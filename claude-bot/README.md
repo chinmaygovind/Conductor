@@ -1,7 +1,7 @@
-# claude-bot — ML Training for Ticket to Ride
+# claude-bot — ML Training for Conductor
 
 This directory contains everything needed to train the `claude_bot` personality to play
-Ticket to Ride at a high level using machine learning (not hand-coded heuristics).
+Conductor at a high level using machine learning (not hand-coded heuristics).
 
 ## Directory Structure
 

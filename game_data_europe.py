@@ -190,7 +190,7 @@ EUROPE_ROUTES = [
     {"id":217,"city1":"Smyrna",       "city2":"Palermo",       "length":6,"color":"gray",  "double_group":None,          "side":0,"tunnel":False,"ferry":2,"ferry_segments":[0,1]},
 ]
 
-# ── Destination Tickets ───────────────────────────────────────────────────────
+# ── Destinations ───────────────────────────────────────────────────────
 # 40 short tickets + 6 long tickets (separate decks).
 # long=True tickets are dealt 1 per player at game start and MUST be kept.
 

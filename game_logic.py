@@ -1,5 +1,5 @@
 """
-Full game logic for Ticket to Ride (North America + Europe).
+Full game logic for Conductor (North America + Europe).
 All state lives in a single dict that is serialized to the DB as JSON.
 """
 
@@ -80,7 +80,7 @@ def init_game_state(players: list[dict], map_variant: str = "usa") -> dict:
 
     turn_order = sorted(players, key=lambda x: x["turn_order"])
 
-    # Deal initial destination tickets
+    # Deal initial destinations
     if is_europe:
         # Each player gets 1 long + 3 short as pending choices; must keep ≥2
         for p in players:
@@ -167,7 +167,7 @@ def keep_initial_tickets(state: dict, player_id: str, keep_ids: list[int]) -> di
     is_europe = state.get("map") == "europe"
     min_keep = 2
     if len(keep_ids) < min_keep:
-        return {"ok": False, "error": f"Must keep at least {min_keep} destination ticket{'s' if min_keep > 1 else ''}."}
+        return {"ok": False, "error": f"Must keep at least {min_keep} destination{'s' if min_keep > 1 else ''}."}
     if not all(k in pending for k in keep_ids):
         return {"ok": False, "error": "Invalid ticket selection."}
 
@@ -218,7 +218,7 @@ def draw_face_up(state: dict, player_id: str, slot: int) -> dict:
     if state.get("pending_tunnel"):
         return {"ok": False, "error": "Resolve the pending tunnel first."}
     if state["player_states"][player_id].get("pending_tickets"):
-        return {"ok": False, "error": "Keep your destination tickets first."}
+        return {"ok": False, "error": "Keep your destinations first."}
 
     card = state["face_up"][slot]
     if card == "locomotive" and state["draw_step"] == 1:
@@ -265,7 +265,7 @@ def draw_blind(state: dict, player_id: str) -> dict:
     if state.get("pending_tunnel"):
         return {"ok": False, "error": "Resolve the pending tunnel first."}
     if state["player_states"][player_id].get("pending_tickets"):
-        return {"ok": False, "error": "Keep your destination tickets first."}
+        return {"ok": False, "error": "Keep your destinations first."}
     _ensure_deck(state)
     if not state["deck"]:
         return {"ok": False, "error": "No cards left to draw."}
@@ -307,7 +307,7 @@ def claim_route(state: dict, player_id: str, route_id: int, cards_to_use: dict) 
     if state.get("pending_tunnel"):
         return {"ok": False, "error": "Resolve the pending tunnel first."}
     if state["player_states"][player_id].get("pending_tickets"):
-        return {"ok": False, "error": "Keep your destination tickets first."}
+        return {"ok": False, "error": "Keep your destinations first."}
 
     map_variant = state.get("map", "usa")
     route_by_id, _, route_scoring, double_groups = _map_data(map_variant)
@@ -540,7 +540,7 @@ def place_station(state: dict, player_id: str, city: str, cards_to_use: dict) ->
 
     ps = state["player_states"][player_id]
     if ps.get("pending_tickets"):
-        return {"ok": False, "error": "Keep your destination tickets first."}
+        return {"ok": False, "error": "Keep your destinations first."}
     stations_placed = len(state["stations"].get(player_id, []))
     if ps.get("station_count", 0) <= 0:
         return {"ok": False, "error": "No stations remaining."}
@@ -586,7 +586,7 @@ def _expand_cards(cards: dict) -> list:
 
 
 # ---------------------------------------------------------------------------
-# Draw Destination Tickets
+# Draw Destinations
 # ---------------------------------------------------------------------------
 
 def draw_destination_tickets(state: dict, player_id: str) -> dict:
@@ -599,10 +599,10 @@ def draw_destination_tickets(state: dict, player_id: str) -> dict:
     if state.get("pending_tunnel"):
         return {"ok": False, "error": "Resolve the tunnel first."}
     if state["player_states"][player_id].get("pending_tickets"):
-        return {"ok": False, "error": "Keep your current destination tickets first."}
+        return {"ok": False, "error": "Keep your current destinations first."}
 
     if not state["dest_deck"]:
-        return {"ok": False, "error": "No destination tickets left."}
+        return {"ok": False, "error": "No destinations left."}
 
     _, ticket_by_id, _, _ = _map_data(state.get("map", "usa"))
     ps = state["player_states"][player_id]
@@ -631,7 +631,7 @@ def keep_drawn_tickets(state: dict, player_id: str, keep_ids: list[int]) -> dict
     returned = [t for t in pending if t not in keep_ids]
     state["dest_deck"].extend(returned)
     ps["pending_tickets"] = []
-    _log(state, f"{ps['name']} drew destination tickets.")
+    _log(state, f"{ps['name']} drew destinations.")
     _next_turn(state)
     return {"ok": True}
 
@@ -776,8 +776,8 @@ def _end_game(state: dict):
 
     state["scores"] = scores
 
-    # Official Ticket to Ride tiebreak: highest score, then most COMPLETED
-    # destination tickets, then longest path.
+    # Tiebreak: highest score, then most COMPLETED
+    # destinations, then longest path.
     sorted_players = sorted(scores.items(), key=lambda x: (
         x[1]["total"],
         sum(1 for t in x[1]["tickets"] if t["completed"]),

@@ -191,7 +191,7 @@ ROUTES = [
     {"id": 99, "city1": "Charleston",     "city2": "Miami",          "length": 4, "color": "pink",   "double_group": None,       "side": 0},
 ]
 
-# 30 Destination Tickets
+# 30 Destinations
 DESTINATION_TICKETS = [
     {"id":  1, "city1": "Denver",         "city2": "El Paso",         "points":  4},
     {"id":  2, "city1": "Kansas City",    "city2": "Houston",         "points":  5},

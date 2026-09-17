@@ -1,5 +1,5 @@
 /* ============================================================
-   Ticket to Ride — Game Client
+   Conductor — Game Client
    ============================================================ */
 
 const socket = io();
@@ -1147,7 +1147,7 @@ function renderTickets() {
   const area = document.getElementById('tickets-panel');
 
   if (!me.tickets || me.tickets.length === 0) {
-    area.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;">No tickets yet.</div>';
+    area.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;">No destinations yet.</div>';
     return;
   }
 
@@ -1243,7 +1243,7 @@ function renderStatusBar() {
           openInitialTicketsModal();
         });
       } else {
-        bar.textContent = '⬆ Choose your starting destination tickets (keep at least 2)';
+        bar.textContent = '⬆ Choose your starting destinations (keep at least 2)';
         bar.style.color = '#f59e0b';
       }
     } else {
@@ -1390,7 +1390,7 @@ function onRouteClick(routeId) {
   if (!gameState) return;
   if (gameState.current_player_id !== MY_PLAYER_ID) return;
   if (hasPendingTickets()) {
-    showStatus('Keep your destination tickets first.', '#f97316');
+    showStatus('Keep your destinations first.', '#f97316');
     return;
   }
   if (gameState.draw_step !== 0) {
@@ -1716,7 +1716,7 @@ function openInitialTicketsModal() {
   const minKeep = isInitial ? 2 : 1;
 
   document.getElementById('ticket-modal-title').textContent =
-    isInitial ? 'Choose Your Starting Tickets' : 'Keep Destination Tickets';
+    isInitial ? 'Choose Your Starting Destinations' : 'Keep Destinations';
 
   const longTicketId = (isInitial && isEurope) ? me.long_ticket_id : null;
   let descText = `Choose which tickets to keep (minimum ${minKeep}).`;
@@ -2117,7 +2117,7 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  // T — draw destination tickets (only on your turn, not mid-draw)
+  // T — draw destinations (only on your turn, not mid-draw)
   if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey && !e.altKey) {
     if (myTurn && !IS_SPECTATOR && gameState.draw_step === 0) {
       e.preventDefault();
