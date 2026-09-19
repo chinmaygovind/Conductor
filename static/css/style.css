@@ -22,12 +22,33 @@ html, body {
   color: var(--text);
 }
 
+/* A link with no class of its own - the "forgot your password?" line, the two
+   notes on the account page pointing at cgovind.com. There was no bare `a` rule
+   at all, so those three were drawn in the browser's default link blue on a
+   near-black panel, and in purple once visited: off-palette, and the worst
+   contrast on the page.
+
+   An element selector is beaten by every class, so this restyles nothing that
+   already had a rule - `.site-nav-link`, `.btn-*` and the rest are untouched.
+   It does not need `:visited` either: an author rule beats the user agent's
+   `a:visited` whatever the specificity says, because author styles win on
+   origin. */
+a {
+  color: var(--gold-light);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+a:hover { color: var(--gold); }
+a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
 /* ─── Landing page ───────────────────────────────────────────────── */
 .landing-bg {
   min-height: 100vh;
   background:
     radial-gradient(ellipse at 50% 0%, rgba(200,168,75,0.15) 0%, transparent 70%),
-    url('/static/images/board.svg') center/cover no-repeat;
+    url('/static/images/board-hero.svg') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1325,7 +1346,7 @@ body.spectating #draw-blind-btn { display: none; }
   min-height: 100vh;
   background:
     radial-gradient(ellipse at 50% 0%, rgba(200,168,75,0.15) 0%, transparent 70%),
-    url('/static/images/board.svg') center/cover no-repeat;
+    url('/static/images/board-hero.svg') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1605,10 +1626,28 @@ body.spectating #draw-blind-btn { display: none; }
 }
 
 /* ─── Lobbies page ──────────────────────────────────────────────── */
+/* The signed-in pages - lobbies, account, history, leaderboard - all share this
+   wrapper, so the map goes on once here. It is the same board-hero.svg the login
+   page uses, held right back: these pages carry tables and lists, and anything
+   you can actually read the map through competes with them.
+
+   Layered in the shorthand rather than drawn by a `::before`, because a
+   positioned pseudo-element on this wrapper would sit in the same stacking
+   context as the content inside it and there is no z-index I could give it that
+   is safe for every child. The first layer listed paints on top, so the order
+   reads backwards: gold glow, then the wash that knocks the map down, then the
+   map, then the flat colour under everything.
+
+   `fixed` so `cover` sizes to the viewport and not to the element - a long
+   leaderboard is several screens tall, and a cover image sized to *that* is the
+   map stretched into a smear. Where `background-attachment: fixed` is ignored
+   (some mobile Safari), it degrades to scrolling, which is merely less nice. */
 .lobbies-bg {
   min-height: 100vh;
   background:
     radial-gradient(ellipse at 50% -20%, rgba(200,168,75,0.1) 0%, transparent 55%),
+    linear-gradient(rgba(15,14,12,0.88), rgba(15,14,12,0.88)),
+    url('/static/images/board-hero.svg') center/cover no-repeat fixed,
     var(--bg-dark);
 }
 /* ─── Shared site nav ────────────────────────────────────────────── */
@@ -2097,10 +2136,19 @@ body.spectating #draw-blind-btn { display: none; }
 }
 
 /* ─── Leaderboard ──────────────────────────────────────────── */
+/* The scrim is on the table, not on the rows. `.lobbies-bg` puts the route map
+   behind this page, and unlike the account page's cards this table has no
+   surface of its own - every row was transparent, so a coloured route ran
+   straight behind a rank and an ELO. Backing the table gives every row the same
+   ground, and because it sits on the table rather than on a `tr` or a `td` it
+   stays *under* `.lb-row:hover` and `.lb-me`, which are translucent golds that
+   have to read as a tint of the row and not replace it. */
 .leaderboard-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
+  background: rgba(15, 14, 12, 0.62);
+  border-radius: var(--radius);
 }
 .leaderboard-table th {
   font-family: 'Cinzel', serif;
