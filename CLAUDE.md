@@ -167,3 +167,32 @@ Production runtime: `gunicorn --worker-class eventlet -w 1` behind nginx (`deplo
 multi-branch model and a `game_data.py` that no longer exist). Reality: `main` is the single
 deployed branch, map data lives in `game_data_na.py` / `game_data_europe.py`, and `aws-deploy` is
 legacy/stale. Trust the code and this file over those docs.
+
+### The install prompt
+
+**`/install` and the bottom-sheet nudge that points at it are one pattern copied
+into all four PWA games** (drive, ers, kot, ttr), each in its own colours. The
+prompt is a `{% block install_prompt %}` in `base.html`, so the in-game
+templates (`game.html` and `replay.html`) blank it - a fixed bar over a
+game in progress is a way of losing the game, and the block is the same gate
+`_nav.html`'s absence already is on those pages.
+
+It shows only on `(pointer: coarse)` and only when the page is not already the
+installed app. **All three display modes are tested**, not just `standalone`:
+a manifest's `display` decides which one an installed copy matches, and
+Conductor is `standalone` today but a manifest edit must not
+quietly switch the prompt back on inside the app. `navigator.standalone` covers iOS, which
+matches no display-mode query at all. A dismissal goes in `localStorage` behind
+a try/catch, because private mode throws on access rather than returning null.
+
+`/install` ships **both** sets of steps and picks between them in JS rather than
+off the User-Agent, so a link pasted into a group chat is right for whoever
+opens it. iOS step 1 is **Open in Safari** (`x-safari-` + the current URL) -
+only Safari can add to the home screen, and an in-app webview is where that link
+matters. On Android the page also captures `beforeinstallprompt` **in `<head>`**,
+because Chrome fires it once, early, and never replays it; the manual steps stay
+visible, so a browser that never fires it loses nothing.
+
+Conductor has no `.btn`; the prompt and the steps use `.btn-primary`, which is
+`width: 100%` by default - `.ins-open` sets `width: auto` to get an inline
+button back, and both reset the `a` underline.

@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Get the app &mdash; Conductor{% endblock %}
+
+{# The one page the install prompt in `base.html` points at. It ships both sets
+   of steps and picks between them in JS rather than off the User-Agent, so a
+   link pasted into a group chat is right for whoever opens it and either set
+   can still be read on a desktop. `beforeinstallprompt` is captured in the head
+   because Chrome fires it once, early, and never replays it - by the time the
+   body script runs it is already gone. #}
+
+{% block head %}
+<script>
+  window.__bip = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    window.__bip = e;
+    document.dispatchEvent(new Event('bip'));
+  });
+</script>
+{% endblock %}
+
+{% block install_prompt %}{% endblock %}
+
+{% block body %}
+<div class="lobbies-bg">
+  {% set active_page = 'install' %}
+  {% include '_nav.html' %}
+  <div class="lobbies-body ins">
+  <div class="ins-head">
+    <img src="/static/images/icon.svg" alt="" class="ins-icon"/>
+    <h1>Get the Conductor app</h1>
+    <p class="lede">Add Conductor to your home screen and it opens like any other app &mdash; full screen, no address bar, one tap away. It takes about ten seconds and installs nothing.</p>
+  </div>
+
+  <div class="ins-seg">
+    <button type="button" class="ins-tab" data-os="ios">iPhone &amp; iPad</button>
+    <button type="button" class="ins-tab" data-os="android">Android</button>
+  </div>
+
+  <div class="ins-steps" data-os="ios" hidden>
+    <ol>
+      <li>
+        <span class="ins-n">1</span>
+        <div>
+          <h3>Open this page in Safari</h3>
+          <p>Only Safari can add an app to the iPhone home screen. If you are
+            already in it, carry straight on to step&nbsp;2.</p>
+          <a class="btn-primary ins-open" href="#" rel="nofollow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.8 8.2 10.9 10.9 8.2 15.8 13.1 13.1z" fill="currentColor"/></svg> Open in Safari</a>
+        </div>
+      </li>
+      <li>
+        <span class="ins-n">2</span>
+        <div>
+          <h3>Tap the Share button</h3>
+          <p>It sits in the bar along the bottom of Safari.</p>
+          <span class="ins-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v11"/><path d="M8.3 6.7 12 3l3.7 3.7"/><path d="M7.5 10.5H6a1.5 1.5 0 0 0-1.5 1.5v7.5A1.5 1.5 0 0 0 6 21h12a1.5 1.5 0 0 0 1.5-1.5V12a1.5 1.5 0 0 0-1.5-1.5h-1.5"/></svg> Share</span>
+        </div>
+      </li>
+      <li>
+        <span class="ins-n">3</span>
+        <div>
+          <h3>Pick &ldquo;Add to Home Screen&rdquo;</h3>
+          <p>Scroll the list down a little &mdash; it is below the row of apps.</p>
+          <span class="ins-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M12 8.5v7M8.5 12h7"/></svg> Add to Home Screen</span>
+        </div>
+      </li>
+      <li>
+        <span class="ins-n">4</span>
+        <div>
+          <h3>Tap Add</h3>
+          <p>Conductor lands on your home screen with the rest of your apps.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <div class="ins-steps" data-os="android" hidden>
+    <div class="ins-live" hidden>
+      <p>Your browser can do this for you &mdash; no menus needed.</p>
+      <button type="button" class="btn-primary">Install Conductor</button>
+    </div>
+    <ol>
+      <li>
+        <span class="ins-n">1</span>
+        <div>
+          <h3>Open the browser menu</h3>
+          <p>The three dots in the top right of Chrome.</p>
+          <span class="ins-chip"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="19" r="1.9"/></svg> Menu</span>
+        </div>
+      </li>
+      <li>
+        <span class="ins-n">2</span>
+        <div>
+          <h3>Tap &ldquo;Install app&rdquo;</h3>
+          <p>Some browsers call it &ldquo;Add to Home screen&rdquo; instead.</p>
+          <span class="ins-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M4.5 18v1.5A1.5 1.5 0 0 0 6 21h12a1.5 1.5 0 0 0 1.5-1.5V18"/></svg> Install app</span>
+        </div>
+      </li>
+      <li>
+        <span class="ins-n">3</span>
+        <div>
+          <h3>Confirm</h3>
+          <p>Conductor lands on your home screen with the rest of your apps.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <p class="ins-done">Already added it? Open Conductor from the home screen icon
+    and this page will stop asking.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    var wrap = document.querySelector('.ins');
+    var tabs = wrap.querySelectorAll('.ins-tab');
+    var panes = wrap.querySelectorAll('.ins-steps');
+
+    function show(os) {
+      panes.forEach(function (p) { p.hidden = p.dataset.os !== os; });
+      tabs.forEach(function (t) { t.classList.toggle('on', t.dataset.os === os); });
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { show(t.dataset.os); });
+    });
+
+    var apple = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    show(apple ? 'ios' : 'android');
+
+    var open = wrap.querySelector('.ins-open');
+    open.href = 'x-safari-' + location.href;
+
+    var live = wrap.querySelector('.ins-live');
+    function offer() { if (window.__bip) live.hidden = false; }
+    document.addEventListener('bip', offer);
+    offer();
+    live.querySelector('button').addEventListener('click', function () {
+      var e = window.__bip;
+      if (!e) return;
+      window.__bip = null;
+      live.hidden = true;
+      e.prompt();
+    });
+  })();
+</script>
+{% endblock %}

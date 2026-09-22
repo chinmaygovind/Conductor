@@ -2618,3 +2618,99 @@ body.spectating #draw-blind-btn { display: none; }
   background: #38c172; box-shadow: 0 0 0 3px rgba(56, 193, 114, 0.22);
 }
 .online-what { margin-left: auto; opacity: 0.7; font-size: 0.9rem; }
+
+/* --- install prompt ------------------------------------------------------ */
+#a2hs {
+  position: fixed; left: .7rem; right: .7rem; z-index: 60;
+  bottom: calc(.7rem + env(safe-area-inset-bottom));
+  display: grid; grid-template-columns: auto 1fr; gap: .55rem .7rem;
+  align-items: center; padding: .8rem .9rem;
+  background: var(--bg-card); color: var(--text);
+  border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: 0 16px 44px rgba(0,0,0,.55);
+  transform: translateY(170%); opacity: 0;
+  transition: transform .3s cubic-bezier(.2, .8, .3, 1), opacity .3s;
+}
+#a2hs.in { transform: none; opacity: 1; }
+#a2hs .a2hs-ico { width: 40px; height: 40px; border-radius: 9px; }
+#a2hs .a2hs-txt { min-width: 0; line-height: 1.3; }
+#a2hs .a2hs-txt b {
+  display: block; font-family: "Cinzel", Georgia, serif; font-size: 1rem; color: var(--text);
+}
+#a2hs .a2hs-txt span { display: block; font-size: .8rem; color: var(--text-muted); }
+#a2hs .btn-primary {
+  grid-column: 1 / -1; display: block; width: 100%; margin-top: .15rem;
+  font-size: .95rem; padding: .6rem 1rem; letter-spacing: .06em;
+  text-align: center; text-decoration: none;
+}
+#a2hs .btn-primary:hover { text-decoration: none; }
+#a2hs .a2hs-x {
+  position: absolute; top: -12px; right: -10px; width: 30px; height: 30px;
+  display: grid; place-items: center; padding: 0; cursor: pointer;
+  border: 2px solid #9c8036; border-radius: 50%;
+  background: var(--bg-card); color: var(--text); font-size: 1.15rem; line-height: 1;
+  box-shadow: 0 4px 12px rgba(0,0,0,.55);
+}
+
+/* --- install instructions page ------------------------------------------ */
+.ins { max-width: 620px; }
+.ins-head { text-align: center; margin-bottom: 1.7rem; }
+.ins-head .ins-icon {
+  width: 84px; height: 84px; border-radius: 19px; padding: 7px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  box-shadow: 0 12px 30px rgba(0,0,0,.55);
+}
+.ins-head h1 { margin: .9rem 0 .4rem; }
+.ins-head .lede { margin: 0 auto; max-width: 46ch; color: var(--text-muted); }
+.ins-seg {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5px;
+  padding: 5px; margin-bottom: 1.4rem;
+  border: 1px solid var(--border); border-radius: 14px; background: var(--bg-panel);
+}
+.ins-tab {
+  font-family: "Cinzel", Georgia, serif; font-size: .95rem;
+  padding: .55rem .4rem; border: 0; border-radius: 10px; cursor: pointer;
+  background: transparent; color: var(--text-muted);
+}
+.ins-tab.on {
+  background: linear-gradient(180deg, var(--gold-light), var(--gold) 55%, #9c8036);
+  color: #3a2606;
+}
+.ins-live, .ins-steps li {
+  background: var(--bg-card); color: var(--text);
+  border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.55);
+}
+.ins-live { margin: 0 0 1.1rem; padding: 1.1rem; text-align: center; }
+.ins-live .btn-primary { margin-top: 0; }
+.ins-live p { margin: 0 0 .8rem; font-size: .92rem; color: var(--text-muted); }
+.ins-steps ol { list-style: none; margin: 0; padding: 0; display: grid; gap: .85rem; }
+.ins-steps li {
+  display: grid; grid-template-columns: auto 1fr; gap: .95rem;
+  padding: 1.05rem 1.15rem;
+}
+.ins-n {
+  width: 32px; height: 32px; display: grid; place-items: center;
+  border-radius: 50%; font-family: "Cinzel", Georgia, serif; font-size: 1rem; color: #3a2606;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold) 55%, #9c8036);
+  box-shadow: 0 2px 0 #9c8036;
+}
+.ins-steps h3 { margin: .25rem 0 .35rem; font-size: 1.05rem; color: var(--text); }
+.ins-steps p { margin: 0; font-size: .9rem; color: var(--text-muted); }
+.ins-chip {
+  display: inline-flex; align-items: center; gap: .45rem; margin-top: .65rem;
+  padding: .38rem .65rem; font-size: .85rem;
+  border: 1px solid rgba(200,168,75,.3); border-radius: 9px; background: rgba(200,168,75,.09);
+  color: var(--text);
+}
+.ins-chip svg { width: 17px; height: 17px; }
+.ins-open {
+  display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+  width: auto; margin-top: .75rem; font-size: .95rem; padding: .5rem 1.1rem;
+  text-decoration: none;
+}
+.ins-open svg { width: 18px; height: 18px; }
+.ins .ins-done {
+  margin-top: 1.3rem; padding: 1rem; text-align: center; font-size: .9rem;
+  border: 1px dashed var(--border); border-radius: 14px; color: var(--text-muted);
+}

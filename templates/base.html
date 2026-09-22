@@ -47,6 +47,48 @@
       });
     })();
   </script>
+  {# The nudge towards the installed app, on every page that is not a game in
+     progress - the in-game templates blank this block for the same reason
+     `_nav.html` is not included in them. It shows only on a coarse pointer and
+     only when the page is not already running as the app; all three display
+     modes are tested because a manifest's `display` decides which one an
+     installed copy matches. A dismissal is remembered in `localStorage`,
+     wrapped because private mode throws on access rather than returning null. #}
+  {% block install_prompt %}
+  <div id="a2hs" hidden>
+    <img class="a2hs-ico" src="/static/images/icon.svg" alt=""/>
+    <div class="a2hs-txt">
+      <b>Try out the Conductor app!</b>
+      <span>It takes &lt;10 seconds to add to your home screen.</span>
+    </div>
+    <a class="btn-primary" href="/install">Show me how</a>
+    <button type="button" class="a2hs-x" aria-label="Not now">&times;</button>
+  </div>
+  <script>
+    (function () {
+      var el = document.getElementById('a2hs');
+      var KEY = 'ttr.a2hs';
+      var app = ['standalone', 'fullscreen', 'minimal-ui'].some(function (m) {
+        return window.matchMedia('(display-mode: ' + m + ')').matches;
+      }) || window.navigator.standalone === true;
+      var phone = window.matchMedia('(pointer: coarse)').matches;
+      var done = false;
+      try { done = localStorage.getItem(KEY) === '1'; } catch (e) {}
+      if (app || done || !phone) return;
+      setTimeout(function () {
+        el.hidden = false;
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { el.classList.add('in'); });
+        });
+      }, 900);
+      el.querySelector('.a2hs-x').addEventListener('click', function () {
+        el.classList.remove('in');
+        try { localStorage.setItem(KEY, '1'); } catch (e) {}
+        setTimeout(function () { el.hidden = true; }, 320);
+      });
+    })();
+  </script>
+  {% endblock %}
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {});
