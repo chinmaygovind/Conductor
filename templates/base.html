@@ -94,5 +94,7 @@
       navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {});
     }
   </script>
+  {# The cgovind.com chat dock (chat.cgovind.com), for people with an account. #}
+  {% if presence_on and chat_url %}<script src="{{ chat_url }}/static/dock.js" defer></script>{% endif %}
 </body>
 </html>

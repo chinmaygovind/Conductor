@@ -83,6 +83,8 @@ _ASSET_VERSION = GIT_VERSION_NAME or 'dev'
 # Deliberately not `SITE_URL`, which on the box already means this service's own
 # public address.
 MAIN_SITE_URL = os.environ.get("MAIN_SITE_URL", "https://cgovind.com").rstrip("/")
+# The cgovind.com chat service whose dock every logged-in page loads. Empty turns it off.
+CHAT_URL = os.environ.get("CHAT_URL", "https://chat.cgovind.com").rstrip("/")
 
 
 @app.context_processor
@@ -95,7 +97,7 @@ def inject_asset_version():
     # and this runs on every render of every page. Not every route passes
     # `user` into its template, so relying on that would have quietly
     # switched the heartbeat off on the pages that do not.
-    return {'asset_version': _ASSET_VERSION, 'site_url': MAIN_SITE_URL,
+    return {'asset_version': _ASSET_VERSION, 'site_url': MAIN_SITE_URL, 'chat_url': CHAT_URL,
             'presence_on': bool(session.get('user_id')),
             'presence_where': PRESENCE_BY_ENDPOINT.get(request.endpoint or '', 'home')}
 
@@ -1086,7 +1088,6 @@ def create_game():
 @app.route("/join", methods=["POST"])
 @require_login
 def join_game_http():
-    player_name = get_effective_name()
     data = request.json or {}
     code = data.get("code", "").strip().upper()
     passcode = data.get("passcode", "").strip()
@@ -1102,12 +1103,25 @@ def join_game_http():
     if game.is_private and game.passcode and game.passcode != passcode:
         return jsonify({"ok": False, "error": "Incorrect passcode."}), 403
 
+    error = _seat_in(game)
+    if error:
+        return jsonify({"ok": False, "error": error}), 400
+    return jsonify({"ok": True, "code": code})
+
+
+def _seat_in(game):
+    """Put the current visitor in ``game``'s lobby. Returns an error, or None.
+
+    Shared by `/join` and the `/j/<code>` invite link, which differ only in
+    whether a private room's passcode is asked for.
+    """
+    code = game.code
     sk = get_session_key()
 
     # Already in the game by session key
     existing = Player.query.filter_by(game_id=game.id, session_key=sk).first()
     if existing:
-        return jsonify({"ok": True, "code": code})
+        return None
 
     # Same user in a different tab/browser — update session key instead of creating a duplicate player
     join_user = get_current_user()
@@ -1116,21 +1130,21 @@ def join_game_http():
         if existing_by_user:
             existing_by_user.session_key = sk
             db.session.commit()
-            return jsonify({"ok": True, "code": code})
+            return None
 
     if len(game.players) >= game.max_players:
-        return jsonify({"ok": False, "error": "Game is full."}), 400
+        return "Game is full."
 
     used_colors = {p.color for p in game.players}
     available = [c for c in PLAYER_COLORS if c not in used_colors]
     if not available:
-        return jsonify({"ok": False, "error": "No colors available."}), 400
+        return "No colors available."
 
     player = Player(
         game_id=game.id,
         user_id=join_user.id if join_user else None,
         session_key=sk,
-        name=player_name,
+        name=get_effective_name(),
         color=available[0],
         turn_order=len(game.players),
         is_host=False,
@@ -1140,7 +1154,20 @@ def join_game_http():
 
     socketio.emit("player_joined", game.to_lobby_dict(), to=code)
     _emit_lobbies_update()
-    return jsonify({"ok": True, "code": code})
+    return None
+
+
+@app.route("/j/<code>")
+@require_login
+def join_link(code):
+    """The invite link a cgovind.com chat invite carries: open it and you are in
+    the lobby. Holding the link is the invitation, so a private game's passcode
+    is not asked for - the passcode keeps strangers out, and a stranger does not
+    have the link. The same rule Drive's `/j/` has always had."""
+    game = Game.query.filter_by(code=(code or "").strip().upper()).first()
+    if not game or game.status != "waiting" or _seat_in(game):
+        return redirect(url_for("lobbies"))
+    return redirect(url_for("lobby", code=game.code))
 
 
 @app.route("/lobby/<code>")

@@ -226,6 +226,21 @@ def test_join_private_game_correct_passcode(client, flask_app):
         assert result["ok"]
 
 
+def test_the_invite_link_seats_you_without_the_passcode(client, flask_app):
+    """`/j/<code>` is what a cgovind.com chat invite carries: holding it is the
+    invitation, as Drive's share link always has been."""
+    create_and_login(client, "host_link")
+    code = http_create_game(client, is_private=True, passcode="sekrit")["code"]
+    with flask_app.test_client() as c2:
+        c2.post("/register", json={
+            "username": "joiner_link", "email": "link@example.com", "password": "Password1!"
+        })
+        resp = c2.get("/j/" + code.lower())
+        assert resp.status_code == 302 and resp.headers["Location"].endswith("/lobby/" + code)
+        assert c2.get("/lobby/" + code).status_code == 200
+        assert c2.get("/j/NOPE00").headers["Location"].endswith("/lobbies")
+
+
 def test_join_full_game(client, flask_app):
     create_and_login(client, "host_full")
     data = http_create_game(client)   # every game is max_players=6 now
