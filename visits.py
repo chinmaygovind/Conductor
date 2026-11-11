@@ -247,6 +247,7 @@ def init_app(app, db, service):
         g.visit_started = True
         g.visitor_id = request.cookies.get(COOKIE) or uuid.uuid4().hex
         g.visitor_is_new = COOKIE not in request.cookies
+        _drop_merged_login(db)
 
     @app.after_request
     def _visits_after(response):                         # pragma: no cover - hook
@@ -260,6 +261,29 @@ def init_app(app, db, service):
         return response
 
     return app
+
+
+MERGED_EMAIL = "merged-into-%@cgovind.invalid"
+
+
+def _drop_merged_login(db):
+    """Sign a browser out of an account that was merged into another one.
+
+    A session cookie cannot be revoked, so a browser that was logged in to an
+    alt before the merge keeps writing to the empty shell until this sees it.
+    """
+    uid = session.get("user_id")
+    if not uid:
+        return
+    try:
+        merged = db.session.execute(text(
+            "SELECT 1 FROM users WHERE id = :id AND email LIKE :pat"
+        ), {"id": uid, "pat": MERGED_EMAIL}).first()
+    except Exception:                                    # noqa: BLE001
+        db.session.rollback()
+        return
+    if merged:
+        session.pop("user_id", None)
 
 
 def _record(db, service, response):
