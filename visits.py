@@ -107,7 +107,10 @@ def is_crawler(agent):
     days around Drive's launch, one request each. **A bare ``Mozilla/5.0`` is
     not one either**: that token is a fossil which every real browser follows
     with a platform, an engine and a version, so alone it is a scanner wearing
-    the shortest string it thinks will pass.
+    the shortest string it thinks will pass. **Nor is ``AppleWebKit`` without
+    ``(KHTML, like Gecko)``**: every WebKit and Blink browser sends the pair,
+    and a scraper ending its string at ``AppleWebKit/537.36`` was 18,673 rows
+    of "people" by Nov 2026, each with a fresh visitor id, from two addresses.
 
     What this deliberately cannot catch is a scanner wearing a *complete and
     plausible* browser string. The commonest single "visitor" on this site is
@@ -126,6 +129,9 @@ def is_crawler(agent):
     if not agent:
         return True
     if agent.lower().rstrip(" /") in ("mozilla", "mozilla/5.0", "mozilla/4.0"):
+        return True
+    low = agent.lower()
+    if "applewebkit" in low and "khtml" not in low:
         return True
     return bool(BOT_RE.search(agent))
 
